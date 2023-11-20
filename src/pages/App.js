@@ -12,23 +12,18 @@ function App() {
   const [repos, setRepos] = useState([]);
 
   const handleSearchRepo = useCallback(async () => {
-
     if (!currentRepo) {
       // Se o campo estiver vazio, exiba uma mensagem ou tome alguma ação apropriada.
       alert('Digite o nome do repositório antes de buscar.');
-      return
+      return;
     }
-    
-    
-      const { data, status } = await api.get(`repos/${currentRepo}`);
 
-      if (status === 400) {
-              console.log(status)
-        // alert("Este repositório é privado")
-      }
+    try {
+      const { data } = await api.get(`repos/${currentRepo}`);
+
       if (data.id) {
         const isExist = repos.find(repo => repo.id === data.id);
-        
+
         if (!isExist) {
           setRepos(prev => [...prev, data]);
           setCurrentRepo('');
@@ -36,8 +31,16 @@ function App() {
         }
       }
 
-      alert('Repositório ja na lista de encontrado!');
-  
+      alert('Repositório já na lista de encontrados!');
+    } catch (error) {
+      if (error.response && error.response.status >= 400) {
+        
+        alert('Repositório inválido');
+      } else {
+        
+        console.error('Erro desconhecido:', error);
+      }
+    }
   }, [currentRepo, repos]);
 
   const handleRemoveRepo = useCallback(id => {
